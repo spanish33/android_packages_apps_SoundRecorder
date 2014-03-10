@@ -65,24 +65,24 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     long mSampleStart = 0;       // time at which latest record or play operation started
     int mSampleLength = 0;      // length of current sample
     File mSampleFile = null;
-    
+
     MediaRecorder mRecorder = null;
     MediaPlayer mPlayer = null;
-    
+
     public Recorder() {
     }
-    
+
     public void saveState(Bundle recorderState) {
         recorderState.putString(SAMPLE_PATH_KEY, mSampleFile.getAbsolutePath());
         recorderState.putInt(SAMPLE_LENGTH_KEY, mSampleLength);
     }
-    
+
     public int getMaxAmplitude() {
         if (mState != RECORDING_STATE)
             return 0;
         return mRecorder.getMaxAmplitude();
     }
-    
+
     public void restoreState(Bundle recorderState) {
         String samplePath = recorderState.getString(SAMPLE_PATH_KEY);
         if (samplePath == null)
@@ -97,14 +97,14 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         if (mSampleFile != null
                 && mSampleFile.getAbsolutePath().compareTo(file.getAbsolutePath()) == 0)
             return;
-        
+
         delete();
         mSampleFile = file;
         mSampleLength = sampleLength;
 
         signalStateChanged(IDLE_STATE);
     }
-    
+
     public void setOnStateChangedListener(OnStateChangedListener listener) {
         mOnStateChangedListener = listener;
     }
@@ -120,13 +120,13 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     public int state() {
         return mState;
     }
-    
+
     public int progress() {
         if (mState == RECORDING_STATE || mState == PLAYING_STATE)
             return (int) ((System.currentTimeMillis() - mSampleStart)/1000);
         return 0;
     }
-    
+
     public int sampleLength() {
         return mSampleLength;
     }
@@ -144,29 +144,30 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
      */
     public void delete() {
         stop();
-        
+
         if (mSampleFile != null)
             mSampleFile.delete();
 
         mSampleFile = null;
         mSampleLength = 0;
-        
+
         signalStateChanged(IDLE_STATE);
     }
-    
+
     /**
-     * Resets the recorder state. If a sample was recorded, the file is left on disk and will 
+     * Resets the recorder state. If a sample was recorded, the file is left on disk and will
      * be reused for a new recording.
      */
     public void clear() {
         stop();
-        
+
+        mSampleFile = null;
         mSampleLength = 0;
-        
+
         signalStateChanged(IDLE_STATE);
     }
-    
-    public void startRecording(int outputfileformat, String extension, 
+
+    public void startRecording(int outputfileformat, String extension,
                    Context context, int audiosourcetype, int codectype) {
         stop();
 
@@ -201,7 +202,7 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             setError(SDCARD_ACCESS_ERROR);
             return;
         }
-        
+
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(audiosourcetype);
         //set channel for surround sound recording.
@@ -281,10 +282,10 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         mSampleLength = (int)( (System.currentTimeMillis() - mSampleStart)/1000 );
         setState(IDLE_STATE);
     }
-    
+
     public void startPlayback() {
         stop();
-        
+
         mPlayer = new MediaPlayer();
         try {
             mPlayer.setDataSource(mSampleFile.getAbsolutePath());
@@ -301,11 +302,11 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             mPlayer = null;
             return;
         }
-        
+
         mSampleStart = System.currentTimeMillis();
         setState(PLAYING_STATE);
     }
-    
+
     public void stopPlayback() {
         if (mPlayer == null) // we were not in playback
             return;
@@ -315,7 +316,7 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         mPlayer = null;
         setState(IDLE_STATE);
     }
-    
+
     public void stop() {
         stopRecording();
         stopPlayback();
@@ -330,20 +331,20 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     public void onCompletion(MediaPlayer mp) {
         stop();
     }
-    
+
     private void setState(int state) {
         if (state == mState)
             return;
-        
+
         mState = state;
         signalStateChanged(mState);
     }
-    
+
     private void signalStateChanged(int state) {
         if (mOnStateChangedListener != null)
             mOnStateChangedListener.onStateChanged(state);
     }
-    
+
     private void setError(int error) {
         if (mOnStateChangedListener != null)
             mOnStateChangedListener.onError(error);
