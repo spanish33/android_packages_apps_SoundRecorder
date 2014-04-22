@@ -1055,6 +1055,9 @@ public class SoundRecorder extends Activity
         }
         mSampleInterrupted = mRecorder.state() == Recorder.RECORDING_STATE;
         mRecorder.stop();
+        if (mRecorder.sampleLength() > 0) {
+            mRecorderStop = true;
+        }
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
         super.onPause();
     }
