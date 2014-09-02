@@ -36,7 +36,6 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
     static final String SAMPLE_PREFIX = "recording";
     static final String SAMPLE_PATH_KEY = "sample_path";
     static final String SAMPLE_LENGTH_KEY = "sample_length";
-    static final String DATE_FORMAT = "yyyyMMddHHmmss";
 
     public static final int IDLE_STATE = 0;
     public static final int RECORDING_STATE = 1;
@@ -179,32 +178,41 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
             delete();
         }
 
-        File sampleDir = new File(mStoragePath);
-        if (!sampleDir.exists()) {
-            sampleDir.mkdirs();
-        }
-        if (!sampleDir.canWrite()) // Workaround for broken sdcard support on the device.
-            sampleDir = new File("/sdcard/sdcard");
-
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
-            String time = simpleDateFormat.format(new Date(System.currentTimeMillis()));
-            mTime = time;
-            if (extension == null) {
-                extension = ".tmp";
+        if (mSampleFile == null) {
+            File sampleDir = new File(mStoragePath);
+            if (!sampleDir.exists()) {
+                sampleDir.mkdirs();
             }
+            if (!sampleDir.canWrite()) // Workaround for broken sdcard support on the device.
+                sampleDir = new File("/sdcard/sdcard");
 
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(SAMPLE_PREFIX).append(time).append(extension);
-            String name = stringBuilder.toString();
-            mSampleFile = new File(sampleDir, name);
+            try {
+                if (!"".equals(context.getResources().getString(R.string.def_save_name_prefix))) {
+                    String prefix = context.getResources().
+                            getString(R.string.def_save_name_prefix) + '-';
+                    mSampleFile = createTempFile(context, prefix, extension, sampleDir);
+                } else {
+                    String dataFormat = context.getResources().getString(R.string.def_data_format);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dataFormat);
+                    String time = simpleDateFormat.format(new Date(System.currentTimeMillis()));
+                    mTime = time;
+                    if (extension == null) {
+                        extension = ".tmp";
+                    }
 
-            if (!mSampleFile.createNewFile()) {
-                mSampleFile = File.createTempFile(SAMPLE_PREFIX, extension, sampleDir);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(SAMPLE_PREFIX).append(time).append(extension);
+                    String name = stringBuilder.toString();
+                    mSampleFile = new File(sampleDir, name);
+
+                    if (!mSampleFile.createNewFile()) {
+                        mSampleFile = File.createTempFile(SAMPLE_PREFIX, extension, sampleDir);
+                    }
+                }
+            } catch (IOException e) {
+                setError(SDCARD_ACCESS_ERROR);
+                return;
             }
-        } catch (IOException e) {
-            setError(SDCARD_ACCESS_ERROR);
-            return;
         }
 
         mRecorder = new MediaRecorder();
@@ -386,5 +394,32 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
 
     public void setStoragePath(String path) {
         mStoragePath = path;
+    }
+
+    public File createTempFile(Context context, String prefix, String suffix, File directory)
+            throws IOException {
+        // Force a prefix null check first
+        if (prefix.length() < 3) {
+            throw new IllegalArgumentException("prefix must be at least 3 characters");
+        }
+        if (suffix == null) {
+            suffix = ".tmp";
+        }
+        File tmpDirFile = directory;
+        if (tmpDirFile == null) {
+            String tmpDir = System.getProperty("java.io.tmpdir", ".");
+            tmpDirFile = new File(tmpDir);
+        }
+
+        String nameFormat = context.getResources().getString(R.string.def_save_name_format);
+        SimpleDateFormat df = new SimpleDateFormat(nameFormat);
+        String currentTime = df.format(System.currentTimeMillis());
+        mTime = currentTime;
+
+        File result;
+        do {
+            result = new File(tmpDirFile, prefix + currentTime + suffix);
+        } while (!result.createNewFile());
+        return result;
     }
 }

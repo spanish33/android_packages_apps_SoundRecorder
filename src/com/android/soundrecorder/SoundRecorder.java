@@ -389,8 +389,10 @@ public class SoundRecorder extends Activity
         }
 
         mPath = mSharedPreferences.getInt("path", mPath);
-        mRequestedType = mSharedPreferences.getString("requestedType", mRequestedType);
-        mFileType = mSharedPreferences.getInt("fileType", mFileType);
+        mRequestedType = mSharedPreferences.getString("requestedType",
+                getResources().getString(R.string.def_save_mimetype));
+        mFileType = mSharedPreferences.getInt("fileType",
+                getResources().getInteger(R.integer.def_save_type));
         mStoragePath = mSharedPreferences.getString("storagePath", mStoragePath);
         if (!mWAVSupport && mRequestedType == AUDIO_WAVE_2CH_LPCM) {
             mRequestedType = AUDIO_AMR;
@@ -1279,8 +1281,14 @@ public class SoundRecorder extends Activity
         long modDate = file.lastModified();
         String title = mRecorder.getStartRecordingTime();
         long sampleLengthMillis = mRecorder.sampleLength() * 1000L;
-        mLastFileName = file.getAbsolutePath().substring(
-                file.getAbsolutePath().lastIndexOf("/")+1, file.getAbsolutePath().length()).replace("-", "");
+        if (!"".equals(res.getString(R.string.def_save_name_prefix))) {
+            mLastFileName = file.getAbsolutePath().substring(
+                    file.getAbsolutePath().lastIndexOf("/") + 1, file.getAbsolutePath().length());
+        } else {
+            mLastFileName = file.getAbsolutePath().substring(
+                    file.getAbsolutePath().lastIndexOf("/") + 1,
+                    file.getAbsolutePath().length()).replace("-", "");
+        }
 
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         final String[] ids = new String[] { MediaStore.Audio.Playlists._ID };
