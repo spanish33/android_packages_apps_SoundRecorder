@@ -192,8 +192,8 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
                             getString(R.string.def_save_name_prefix) + '-';
                     mSampleFile = createTempFile(context, prefix, extension, sampleDir);
                 } else {
-                    String dataFormat = context.getResources().getString(R.string.def_data_format);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dataFormat);
+                    String dateFormat = context.getResources().getString(R.string.def_date_format);
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
                     String time = simpleDateFormat.format(new Date(System.currentTimeMillis()));
                     mTime = time;
                     if (extension == null) {

@@ -38,7 +38,7 @@
             default value is null
     -->
     <string name="def_save_name_format" translatable="false"></string>
-    <string name="def_data_format">"yyyy-MM-dd HH:mm:ss"</string>
+    <string name="def_date_format">"yyyy-MM-dd-HH-mm-ss"</string>
 
     <!--
          the type of saved recordings files.The value is 0-amr , 1-3gpp , 2-wav.Default is 0-amr.
