@@ -29,6 +29,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class Recorder implements OnCompletionListener, OnErrorListener {
@@ -195,6 +196,10 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
                     String dateFormat = context.getResources().getString(R.string.def_date_format);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
                     String time = simpleDateFormat.format(new Date(System.currentTimeMillis()));
+                    if (!TextUtils.isEmpty(time)) {
+                        time = time.replaceAll("[\\\\*|\":<>/?]", "_").replaceAll(" ",
+                                "\\\\" + " ");
+                    }
                     mTime = time;
                     if (extension == null) {
                         extension = ".tmp";
@@ -414,6 +419,10 @@ public class Recorder implements OnCompletionListener, OnErrorListener {
         String nameFormat = context.getResources().getString(R.string.def_save_name_format);
         SimpleDateFormat df = new SimpleDateFormat(nameFormat);
         String currentTime = df.format(System.currentTimeMillis());
+        if (!TextUtils.isEmpty(currentTime)) {
+            currentTime = currentTime.replaceAll("[\\\\*|\":<>/?]", "_").replaceAll(" ",
+                    "\\\\" + " ");
+        }
         mTime = currentTime;
 
         File result;
