@@ -389,8 +389,11 @@ public class SoundRecorder extends Activity
         }
 
         mPath = mSharedPreferences.getInt("path", mPath);
-        mRequestedType = mSharedPreferences.getString("requestedType",
-                getResources().getString(R.string.def_save_mimetype));
+        if (!mExitAfterRecord) {
+            // Don't reload cached encoding type,if it's assigned by external intent.
+            mRequestedType = mSharedPreferences.getString("requestedType",
+                    getResources().getString(R.string.def_save_mimetype));
+        }
         mFileType = mSharedPreferences.getInt("fileType",
                 getResources().getInteger(R.integer.def_save_type));
         mStoragePath = mSharedPreferences.getString("storagePath", mStoragePath);
@@ -836,7 +839,8 @@ public class SoundRecorder extends Activity
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         menu.findItem(R.id.menu_item_keyboard).setEnabled(mRecorder.state() == Recorder.IDLE_STATE);
-        menu.findItem(R.id.menu_item_filetype).setEnabled(mRecorder.state() == Recorder.IDLE_STATE);
+         menu.findItem(R.id.menu_item_filetype).setEnabled(
+                (mRecorder.state() == Recorder.IDLE_STATE) && (!mExitAfterRecord));
         menu.findItem(R.id.menu_item_storage).setEnabled(mRecorder.state() == Recorder.IDLE_STATE);
         if (SystemProperties.getBoolean("debug.soundrecorder.enable", false)) {
             menu.findItem(R.id.menu_item_keyboard).setVisible(true);
