@@ -681,7 +681,7 @@ public class SoundRecorder extends Activity
                 invalidateOptionsMenu();
                 break;
             case R.id.playButton:
-                if (!mRecorder.sampleFile().exists()) {
+                if (mRecorder.sampleFile() == null || !mRecorder.sampleFile().exists()) {
                     Toast.makeText(SoundRecorder.this, R.string.file_deleted,
                             Toast.LENGTH_SHORT).show();
                     finish();
@@ -698,7 +698,7 @@ public class SoundRecorder extends Activity
                 invalidateOptionsMenu();
                 break;
             case R.id.acceptButton:
-                if (!mRecorder.sampleFile().exists()) {
+                if (mRecorder.sampleFile() == null || !mRecorder.sampleFile().exists()) {
                     Toast.makeText(SoundRecorder.this, R.string.file_deleted,
                             Toast.LENGTH_SHORT).show();
                     finish();
